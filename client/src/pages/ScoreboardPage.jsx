@@ -8,7 +8,7 @@ export default function ScoreboardPage() {
   const [boards, setBoards] = useState([]);
 
   useEffect(() => {
-    axios.get(`${API}/scoreboard`).then(r => setBoards(r.data.boards || []));
+    axios.get(`${API}/scoreboard`).then(r => setBoards(r.data.scoreboard || []));
   }, []);
 
   const riskColor = r => ({critical:'#fca5a5',high:'#fdba74',medium:'#fde68a',low:'#86efac'})[r];

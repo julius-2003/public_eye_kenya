@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import AppShell from '../components/shared/AppShell.jsx';
+import ProfileCard from '../components/shared/ProfileCard.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -50,7 +51,7 @@ export default function AdminReportsPage() {
 
   return (
     <AppShell>
-      <div className="p-6 max-w-5xl">
+      <div className="p-6 max-w-7xl">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="syne font-extrabold text-xl">Report Management</h1>
@@ -69,39 +70,49 @@ export default function AdminReportsPage() {
           </div>
         </div>
 
-        <div className="space-y-3">
-          {filtered.map(r => {
-            const days = daysLeft(r);
-            return (
-              <div key={r._id} className="rounded-xl p-5 transition-all"
-                style={{background: r.aiFlag ? 'rgba(124,58,237,0.04)' : 'rgba(255,255,255,0.03)', border:`1px solid ${r.aiFlag?'rgba(124,58,237,0.2)':'rgba(255,255,255,0.07)'}`}}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{background:sevBg(r.severity),color:sevColor(r.severity)}}>{r.severity?.toUpperCase()}</span>
-                      {r.aiFlag && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{background:'rgba(124,58,237,0.15)',color:'#A78BFA'}}>🤖 AI FLAGGED</span>}
-                      {overdue(r) && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{background:'rgba(220,38,38,0.15)',color:'#fca5a5'}}>⚠️ OVERDUE</span>}
-                      {days !== null && !overdue(r) && <span className="text-xs text-white/25">⏱ {days}d left</span>}
+        <div className="grid lg:grid-cols-4 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <div className="space-y-3">
+              {filtered.map(r => {
+                const days = daysLeft(r);
+                return (
+                  <div key={r._id} className="rounded-xl p-5 transition-all"
+                    style={{background: r.aiFlag ? 'rgba(124,58,237,0.04)' : 'rgba(255,255,255,0.03)', border:`1px solid ${r.aiFlag?'rgba(124,58,237,0.2)':'rgba(255,255,255,0.07)'}`}}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{background:sevBg(r.severity),color:sevColor(r.severity)}}>{r.severity?.toUpperCase()}</span>
+                          {r.aiFlag && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{background:'rgba(124,58,237,0.15)',color:'#A78BFA'}}>🤖 AI FLAGGED</span>}
+                          {overdue(r) && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{background:'rgba(220,38,38,0.15)',color:'#fca5a5'}}>⚠️ OVERDUE</span>}
+                          {days !== null && !overdue(r) && <span className="text-xs text-white/25">⏱ {days}d left</span>}
+                        </div>
+                        <h3 className="font-bold text-white/80 mb-1">{r.title}</h3>
+                        {r.aiPattern && <p className="text-xs mb-1" style={{color:'#A78BFA'}}>{r.aiPattern}</p>}
+                        <p className="text-white/30 text-xs">📍 {r.subcounty || r.county} · {r.anonymousAlias} · {r.voteScore||0} votes · {r.category}</p>
+                      </div>
+                      <div className="flex flex-col gap-1.5 items-end">
+                        <span className="text-xs capitalize px-2 py-0.5 rounded-full" style={{background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.4)'}}>{r.status}</span>
+                      </div>
                     </div>
-                    <h3 className="font-bold text-white/80 mb-1">{r.title}</h3>
-                    {r.aiPattern && <p className="text-xs mb-1" style={{color:'#A78BFA'}}>{r.aiPattern}</p>}
-                    <p className="text-white/30 text-xs">📍 {r.subcounty || r.county} · {r.anonymousAlias} · {r.voteScore||0} votes · {r.category}</p>
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      <button onClick={() => updateStatus(r._id, 'investigating')} className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:'rgba(22,163,74,0.15)',border:'1px solid rgba(22,163,74,0.3)',color:'#86efac'}}>✓ Investigate</button>
+                      <button onClick={() => updateStatus(r._id, 'resolved')} className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:'rgba(37,99,235,0.15)',border:'1px solid rgba(37,99,235,0.3)',color:'#93C5FD'}}>✓ Resolved</button>
+                      <button onClick={() => updateStatus(r._id, 'whistleblown')} className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:'rgba(124,58,237,0.15)',border:'1px solid rgba(124,58,237,0.3)',color:'#A78BFA'}}>📡 Whistleblow</button>
+                      <button onClick={() => updateStatus(r._id, 'dismissed')} className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(255,255,255,0.4)'}}>Dismiss</button>
+                      <button onClick={() => deleteReport(r._id)} className="px-3 py-1.5 rounded-lg text-xs font-bold ml-auto" style={{background:'rgba(220,38,38,0.1)',border:'1px solid rgba(220,38,38,0.2)',color:'#fca5a5'}}>🗑 Delete</button>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-1.5 items-end">
-                    <span className="text-xs capitalize px-2 py-0.5 rounded-full" style={{background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.4)'}}>{r.status}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2 mt-3 flex-wrap">
-                  <button onClick={() => updateStatus(r._id, 'investigating')} className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:'rgba(22,163,74,0.15)',border:'1px solid rgba(22,163,74,0.3)',color:'#86efac'}}>✓ Investigate</button>
-                  <button onClick={() => updateStatus(r._id, 'resolved')} className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:'rgba(37,99,235,0.15)',border:'1px solid rgba(37,99,235,0.3)',color:'#93C5FD'}}>✓ Resolved</button>
-                  <button onClick={() => updateStatus(r._id, 'whistleblown')} className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:'rgba(124,58,237,0.15)',border:'1px solid rgba(124,58,237,0.3)',color:'#A78BFA'}}>📡 Whistleblow</button>
-                  <button onClick={() => updateStatus(r._id, 'dismissed')} className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(255,255,255,0.4)'}}>Dismiss</button>
-                  <button onClick={() => deleteReport(r._id)} className="px-3 py-1.5 rounded-lg text-xs font-bold ml-auto" style={{background:'rgba(220,38,38,0.1)',border:'1px solid rgba(220,38,38,0.2)',color:'#fca5a5'}}>🗑 Delete</button>
-                </div>
-              </div>
-            );
-          })}
-          {filtered.length === 0 && <p className="text-center py-8 text-white/20">No reports found</p>}
+                );
+              })}
+              {filtered.length === 0 && <p className="text-center py-8 text-white/20">No reports found</p>}
+            </div>
+          </div>
+
+          {/* Profile Sidebar */}
+          <div className="hidden lg:block">
+            <ProfileCard />
+          </div>
         </div>
       </div>
     </AppShell>

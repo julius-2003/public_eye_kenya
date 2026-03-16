@@ -6,6 +6,14 @@ const chatMessageSchema = new mongoose.Schema({
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   alias: { type: String, required: true },
   message: { type: String, required: true, maxlength: 500 },
+  
+  // File attachments (pictures, videos)
+  attachments: [{
+    type: String, // URL of file
+    fileType: String, // 'image' or 'video'
+    fileName: String
+  }],
+  
   deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   deletedAt: { type: Date },
   isDeleted: { type: Boolean, default: false },

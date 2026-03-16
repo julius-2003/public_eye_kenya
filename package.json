@@ -1,5 +1,13 @@
 {
+	"scripts": {
+		"dev": "pnpm --parallel -r run dev",
+		"dev:client": "pnpm -C client dev",
+		"dev:server": "pnpm -C server dev",
+		"build": "pnpm --recursive run build",
+		"start": "pnpm -C server start"
+	},
 	"dependencies": {
-		"mongodb": "^7.1.0"
+		"mongodb": "^7.1.0",
+		"mongoose": "^9.3.0"
 	}
 }

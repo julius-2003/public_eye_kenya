@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Shield, Eye, MapPin, Zap, Users, Lock } from 'lucide-react';
+import SocialMedia from '../components/shared/SocialMedia.jsx';
 
 export default function LandingPage() {
   return (
@@ -43,7 +44,7 @@ export default function LandingPage() {
       {/* Features grid */}
       <div className="max-w-6xl mx-auto px-8 pb-24 grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { icon: <Shield size={24}/>, title:'Anonymous Reporting', desc:'Face verification proves you\'re real. Reports show as "Citizen#4821" — your name never appears.', color:'#BB0000'},
+          { icon: <Shield size={24}/>, title:'Anonymous Reporting', desc:'Reports show as "Citizen#4821" — your name never appears.', color:'#BB0000'},
           { icon: <Zap size={24}/>, title:'AI Pattern Detection', desc:'AI runs every 30 minutes finding repeated contractors, ghost workers, and corruption clusters.', color:'#7C3AED'},
           { icon: <MapPin size={24}/>, title:'County Risk Heatmap', desc:'All 47 counties ranked by AI corruption risk score. Click any county for full analysis.', color:'#C9A84C'},
           { icon: <Lock size={24}/>, title:'Evidence Locker', desc:'SHA-256 hashed files. Chain-of-custody log. Court-admissible tamper-proof evidence.', color:'#059669'},
@@ -72,8 +73,17 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <footer className="text-center py-8 border-t border-white/5 text-white/20 text-sm">
-        © 2025 PublicEye Kenya · For the citizens, by the citizens
+      <footer className="py-8 border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-8">
+          {/* Social Media Links */}
+          <div className="mb-8">
+            <SocialMedia layout="horizontal" size="md" />
+          </div>
+          {/* Footer Text */}
+          <div className="text-center text-white/20 text-sm">
+            © 2025 PublicEye Kenya · For the citizens, by the citizens
+          </div>
+        </div>
       </footer>
     </div>
   );

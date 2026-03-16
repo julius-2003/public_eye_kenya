@@ -17,10 +17,27 @@ export default function LoginPage() {
     try {
       const data = await login(form.email, form.password);
       toast.success(`Welcome back, ${data.user.anonymousAlias}`);
-      if (['countyadmin', 'superadmin'].includes(data.user.role)) navigate('/admin');
-      else navigate('/dashboard');
+      
+      // Role-based navigation
+      if (data.user.role === 'superadmin') {
+        navigate('/admin');
+      } else if (data.user.role === 'countyadmin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      const errMsg = err.response?.data?.message || 'Login failed';
+      const isPending = err.response?.data?.pendingVerification;
+      
+      if (isPending) {
+        toast.error(errMsg, {
+          duration: 5000,
+          icon: '⏳'
+        });
+      } else {
+        toast.error(errMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -62,9 +79,10 @@ export default function LoginPage() {
             style={{background:'#BB0000',color:'white'}}>
             {loading ? 'Signing in...' : 'Sign In →'}
           </button>
-          <p className="text-center text-white/30 text-sm mt-4">
-            No account? <Link to="/register" className="text-red-400 hover:text-red-300">Register</Link>
-          </p>
+          <div className="flex items-center justify-between text-white/30 text-sm mt-4">
+            <Link to="/register" className="text-red-400 hover:text-red-300">New Account</Link>
+            <Link to="/forgot-password" className="text-blue-400 hover:text-blue-300">Forgot Password?</Link>
+          </div>
         </form>
       </div>
     </div>

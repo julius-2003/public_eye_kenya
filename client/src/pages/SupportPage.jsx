@@ -119,7 +119,7 @@ export default function SupportPage() {
             {method === 'pochi' && (
               <div className="rounded-xl p-4 mb-5" style={{background:'rgba(234,179,8,0.08)',border:'1px solid rgba(234,179,8,0.2)'}}>
                 <p className="text-xs text-white/50 mb-1">Send <strong className="text-white">KSh {finalAmount}</strong> to Pochi wa Mtaa:</p>
-                <p className="syne font-extrabold text-2xl" style={{color:'#fde047'}}>{import.meta.env.VITE_POCHI_PHONE || '0712 345 678'}</p>
+                <p className="syne font-extrabold text-2xl" style={{color:'#fde047'}}>{import.meta.env.VITE_POCHI_PHONE || '0702199939'}</p>
                 <p className="text-xs text-white/30 mt-1">PublicEye Kenya</p>
               </div>
             )}

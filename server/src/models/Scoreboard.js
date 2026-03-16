@@ -7,9 +7,11 @@ const scoreboardSchema = new mongoose.Schema({
   responseRate: { type: Number, default: 0 },
   avgResolutionDays: { type: Number, default: 0 },
   corruptionRisk: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'low' },
-  reportCount: { type: Number, default: 0 },
-  resolvedCount: { type: Number, default: 0 },
-  updatedAt: { type: Date, default: Date.now },
+  corruptionRiskScore: { type: Number, default: 0 },
+  corruptionRiskLevel: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'low' },
+  totalReports: { type: Number, default: 0 },
+  resolvedReports: { type: Number, default: 0 },
+  lastUpdated: { type: Date, default: Date.now },
 }, { timestamps: true });
 
 export default mongoose.model('Scoreboard', scoreboardSchema);

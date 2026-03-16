@@ -31,7 +31,7 @@ export const getReports = async (req, res) => {
 
 export const createReport = async (req, res) => {
   try {
-    const { title, description, category, severity, county, subcounty, department, contractorIds } = req.body;
+    const { title, description, category, severity, county, subcounty, department, contractorIds, evidenceFiles } = req.body;
 
     if (req.user.county !== county && req.user.role === 'citizen') {
       return res.status(403).json({ message: 'You can only report in your county' });
@@ -41,7 +41,8 @@ export const createReport = async (req, res) => {
       title, description, category, severity, county, subcounty, department,
       contractorIds: contractorIds ? JSON.parse(contractorIds) : [],
       reportedBy: req.user._id,
-      anonymousAlias: req.user.anonymousAlias
+      anonymousAlias: req.user.anonymousAlias,
+      evidenceFiles: evidenceFiles || []
     });
 
     await req.user.updateOne({ $inc: { totalReports: 1 } });

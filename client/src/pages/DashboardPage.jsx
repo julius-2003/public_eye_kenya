@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext.jsx';
 import AppShell from '../components/shared/AppShell.jsx';
+import ProfileCard from '../components/shared/ProfileCard.jsx';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, MessageSquare, Trophy, Users } from 'lucide-react';
 
@@ -29,75 +30,85 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="p-6 max-w-5xl">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="syne font-extrabold text-xl">Welcome back, {user?.anonymousAlias}</h1>
-            <p className="text-white/30 text-sm">{user?.county} County</p>
-          </div>
-          <Link to="/report" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105" style={{background:'#BB0000',color:'white'}}>
-            <AlertTriangle size={14}/> New Report
-          </Link>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {stats.map((s,i) => (
-            <div key={i} className="rounded-xl p-4" style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)'}}>
-              <div className="syne font-extrabold text-xl" style={{color:s.color||'white'}}>{s.val}</div>
-              <div className="text-white/35 text-xs mt-1">{s.label}</div>
-              {s.sub && <div className="text-green-400 text-xs font-bold mt-1">{s.sub}</div>}
-            </div>
-          ))}
-        </div>
-
-        {/* AI Alert */}
-        {aiFlagged.length > 0 && (
-          <div className="rounded-xl p-4 mb-6 flex items-start gap-3" style={{background:'rgba(124,58,237,0.08)',border:'1px solid rgba(124,58,237,0.25)'}}>
-            <span className="text-xl">🤖</span>
-            <div>
-              <span className="text-white font-bold text-sm">AI Alert: </span>
-              <span className="text-white/60 text-sm">New corruption pattern detected in {user?.county}. {aiFlagged.length} reports linked.</span>
-              <Link to="/report" className="ml-2 text-sm font-bold" style={{color:'#BB0000'}}>View →</Link>
-            </div>
-          </div>
-        )}
-
-        {/* Recent reports */}
-        <div className="rounded-xl overflow-hidden" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.06)'}}>
-          <div className="p-4 flex items-center justify-between" style={{borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
-            <h2 className="syne font-bold text-sm">County Reports</h2>
-            <Link to="/report" className="text-xs text-white/30 hover:text-white">View all →</Link>
-          </div>
-          {reports.slice(0,5).map(r => (
-            <div key={r._id} className="p-4 flex items-center gap-4" style={{borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
-              <div className="flex-1">
-                <div className="text-sm font-semibold text-white/80">{r.title}</div>
-                <div className="text-xs text-white/30 mt-0.5">{r.anonymousAlias} · {r.category} {r.aiFlag ? '· 🤖' : ''}</div>
+      <div className="p-6 max-w-7xl">
+        <div className="grid grid-cols-1 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="syne font-extrabold text-xl">Welcome, {user?.firstName}</h1>
+                <p className="text-white/30 text-sm">{user?.county} County</p>
               </div>
-              <span className="text-xs px-2 py-1 rounded-full font-bold" style={{background:sevBg(r.severity),color:sevColor(r.severity)}}>
-                {r.severity?.toUpperCase()}
-              </span>
-              <span className="text-xs text-white/20">{r.voteScore || 0} votes</span>
+              <Link to="/report" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105" style={{background:'#BB0000',color:'white'}}>
+                <AlertTriangle size={14}/> New Report
+              </Link>
             </div>
-          ))}
-          {reports.length === 0 && <p className="p-6 text-center text-white/20 text-sm">No reports yet in your county</p>}
-        </div>
 
-        {/* Quick links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-          {[
-            {to:'/chat', icon:<MessageSquare size={18}/>, label:'County Chat', color:'#2563EB'},
-            {to:'/heatmap', icon:'🗺️', label:'Risk Heatmap', color:'#BB0000'},
-            {to:'/scoreboard', icon:<Trophy size={18}/>, label:'Scoreboard', color:'#C9A84C'},
-            {to:'/taskforce', icon:<Users size={18}/>, label:'Task Force', color:'#059669'},
-          ].map((l,i) => (
-            <Link key={i} to={l.to} className="rounded-xl p-4 text-center transition-all hover:scale-105"
-              style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.07)'}}>
-              <div className="text-xl mb-2 flex justify-center" style={{color:l.color}}>{l.icon}</div>
-              <div className="text-xs font-semibold text-white/50">{l.label}</div>
-            </Link>
-          ))}
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              {stats.map((s,i) => (
+                <div key={i} className="rounded-xl p-4" style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)'}}>
+                  <div className="syne font-extrabold text-xl" style={{color:s.color||'white'}}>{s.val}</div>
+                  <div className="text-white/35 text-xs mt-1">{s.label}</div>
+                  {s.sub && <div className="text-green-400 text-xs font-bold mt-1">{s.sub}</div>}
+                </div>
+              ))}
+            </div>
+
+            {/* AI Alert */}
+            {aiFlagged.length > 0 && (
+              <div className="rounded-xl p-4 mb-6 flex items-start gap-3" style={{background:'rgba(124,58,237,0.08)',border:'1px solid rgba(124,58,237,0.25)'}}>
+                <span className="text-xl">🤖</span>
+                <div>
+                  <span className="text-white font-bold text-sm">AI Alert: </span>
+                  <span className="text-white/60 text-sm">New corruption pattern detected in {user?.county}. {aiFlagged.length} reports linked.</span>
+                  <Link to="/report" className="ml-2 text-sm font-bold" style={{color:'#BB0000'}}>View →</Link>
+                </div>
+              </div>
+            )}
+
+            {/* Recent reports */}
+            <div className="rounded-xl overflow-hidden" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.06)'}}>
+              <div className="p-4 flex items-center justify-between" style={{borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
+                <h2 className="syne font-bold text-sm">County Reports</h2>
+                <Link to="/report" className="text-xs text-white/30 hover:text-white">View all →</Link>
+              </div>
+              {reports.slice(0,5).map(r => (
+                <div key={r._id} className="p-4 flex items-center gap-4" style={{borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-white/80">{r.title}</div>
+                    <div className="text-xs text-white/30 mt-0.5">{r.anonymousAlias} · {r.category} {r.aiFlag ? '· 🤖' : ''}</div>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full font-bold" style={{background:sevBg(r.severity),color:sevColor(r.severity)}}>
+                    {r.severity?.toUpperCase()}
+                  </span>
+                  <span className="text-xs text-white/20">{r.voteScore || 0} votes</span>
+                </div>
+              ))}
+              {reports.length === 0 && <p className="p-6 text-center text-white/20 text-sm">No reports yet in your county</p>}
+            </div>
+
+            {/* Quick links */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+              {[
+                {to:'/chat', icon:<MessageSquare size={18}/>, label:'County Chat', color:'#2563EB'},
+                {to:'/heatmap', icon:'🗺️', label:'Risk Heatmap', color:'#BB0000'},
+                {to:'/scoreboard', icon:<Trophy size={18}/>, label:'Scoreboard', color:'#C9A84C'},
+                {to:'/taskforce', icon:<Users size={18}/>, label:'Task Force', color:'#059669'},
+              ].map((l,i) => (
+                <Link key={i} to={l.to} className="rounded-xl p-4 text-center transition-all hover:scale-105"
+                  style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.07)'}}>
+                  <div className="text-xl mb-2 flex justify-center" style={{color:l.color}}>{l.icon}</div>
+                  <div className="text-xs font-semibold text-white/50">{l.label}</div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Sidebar - Profile Card */}
+          <div className="lg:col-span-1 lg:row-span-3">
+            <ProfileCard user={user} />
+          </div>
         </div>
       </div>
     </AppShell>

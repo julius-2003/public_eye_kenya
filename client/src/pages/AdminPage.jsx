@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import AppShell from '../components/shared/AppShell.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -8,6 +9,7 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminPage() {
   const { user: me } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState('');
 
@@ -90,6 +92,10 @@ export default function AdminPage() {
                 </span>
               </div>
               <div className="flex gap-2">
+                <button onClick={() => navigate(`/admin/users/${u._id}/profile`)}
+                  className="px-2 py-1 rounded text-xs font-bold" style={{background:'rgba(59,130,246,0.15)',border:'1px solid rgba(59,130,246,0.3)',color:'#93C5FD'}}>
+                  👁 View
+                </button>
                 {me.role === 'superadmin' && u.role === 'citizen' && (
                   <button onClick={() => changeRole(u._id, 'countyadmin', u.county)}
                     className="px-2 py-1 rounded text-xs font-bold" style={{background:'rgba(37,99,235,0.15)',border:'1px solid rgba(37,99,235,0.3)',color:'#93C5FD'}}>

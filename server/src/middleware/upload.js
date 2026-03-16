@@ -15,6 +15,17 @@ const evidenceStorage = multer.diskStorage({
   }
 });
 
+const chatStorage = multer.diskStorage({
+  destination: (req, _file, cb) => {
+    const dir = 'uploads/chat';
+    ensureDir(dir);
+    cb(null, dir);
+  },
+  filename: (_req, file, cb) => {
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.originalname)}`);
+  }
+});
+
 const faceStorage = multer.diskStorage({
   destination: (req, _file, cb) => {
     const dir = 'uploads/faces';
@@ -26,5 +37,18 @@ const faceStorage = multer.diskStorage({
   }
 });
 
+const profileStorage = multer.diskStorage({
+  destination: (req, _file, cb) => {
+    const dir = 'uploads/profiles';
+    ensureDir(dir);
+    cb(null, dir);
+  },
+  filename: (_req, file, cb) => {
+    cb(null, `profile-${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.originalname)}`);
+  }
+});
+
 export const upload = multer({ storage: evidenceStorage, limits: { fileSize: 10 * 1024 * 1024 } });
+export const chatUpload = multer({ storage: chatStorage, limits: { fileSize: 5 * 1024 * 1024 } });
 export const faceUpload = multer({ storage: faceStorage, limits: { fileSize: 5 * 1024 * 1024 } });
+export const profileUpload = multer({ storage: profileStorage, limits: { fileSize: 5 * 1024 * 1024 } });
