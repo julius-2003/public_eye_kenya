@@ -81,7 +81,6 @@ export default function LoginPage() {
           </button>
           <div className="flex items-center justify-between text-white/30 text-sm mt-4">
             <Link to="/register" className="text-red-400 hover:text-red-300">New Account</Link>
-            <Link to="/forgot-password" className="text-blue-400 hover:text-blue-300">Forgot Password?</Link>
           </div>
         </form>
       </div>

@@ -155,7 +155,7 @@ export default function RegisterPage() {
 
         </div>
 
-        <p className="text-center text-white/30 text-sm mt-4">Already registered? <Link to="/login" className="text-red-400">Sign In</Link> | <Link to="/forgot-password" className="text-blue-400">Forgot Password?</Link></p>
+        <p className="text-center text-white/30 text-sm mt-4">Already registered? <Link to="/login" className="text-red-400">Sign In</Link></p>
       </div>
     </div>
   );
