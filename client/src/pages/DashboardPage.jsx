@@ -30,16 +30,16 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="p-6 max-w-7xl">
+      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <div>
-                <h1 className="syne font-extrabold text-xl">Welcome, {user?.firstName}</h1>
-                <p className="text-white/30 text-sm">{user?.county} County</p>
+                <h1 className="syne font-extrabold text-lg sm:text-xl md:text-2xl">Welcome, {user?.firstName}</h1>
+                <p className="text-white/30 text-xs sm:text-sm">{user?.county} County</p>
               </div>
-              <Link to="/report" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105" style={{background:'#BB0000',color:'white'}}>
+              <Link to="/report" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 w-full sm:w-auto justify-center sm:justify-start" style={{background:'#BB0000',color:'white'}}>
                 <AlertTriangle size={14}/> New Report
               </Link>
             </div>
@@ -47,10 +47,10 @@ export default function DashboardPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {stats.map((s,i) => (
-                <div key={i} className="rounded-xl p-4" style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)'}}>
-                  <div className="syne font-extrabold text-xl" style={{color:s.color||'white'}}>{s.val}</div>
+                <div key={i} className="rounded-xl p-3 sm:p-4 text-center sm:text-left" style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)'}}>
+                  <div className="syne font-extrabold text-lg sm:text-xl" style={{color:s.color||'white'}}>{s.val}</div>
                   <div className="text-white/35 text-xs mt-1">{s.label}</div>
-                  {s.sub && <div className="text-green-400 text-xs font-bold mt-1">{s.sub}</div>}
+                  {s.sub && <div className="text-green-400 text-xs font-bold mt-1 hidden sm:block">{s.sub}</div>}
                 </div>
               ))}
             </div>
@@ -96,10 +96,10 @@ export default function DashboardPage() {
                 {to:'/scoreboard', icon:<Trophy size={18}/>, label:'Scoreboard', color:'#C9A84C'},
                 {to:'/taskforce', icon:<Users size={18}/>, label:'Task Force', color:'#059669'},
               ].map((l,i) => (
-                <Link key={i} to={l.to} className="rounded-xl p-4 text-center transition-all hover:scale-105"
+                <Link key={i} to={l.to} className="rounded-xl p-3 sm:p-4 text-center transition-all hover:scale-105"
                   style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.07)'}}>
-                  <div className="text-xl mb-2 flex justify-center" style={{color:l.color}}>{l.icon}</div>
-                  <div className="text-xs font-semibold text-white/50">{l.label}</div>
+                  <div className="flex justify-center mb-2">{typeof l.icon === 'string' ? <span className="text-lg sm:text-xl">{l.icon}</span> : l.icon}</div>
+                  <div className="text-xs sm:text-sm font-semibold" style={{color:l.color}}>{l.label}</div>
                 </Link>
               ))}
             </div>

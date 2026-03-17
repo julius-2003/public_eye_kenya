@@ -26,12 +26,6 @@ import uploadsRoutes from './routes/uploads.js';
 import { setupSocketHandlers } from './utils/socketHandlers.js';
 import { runAIPatternDetector } from './services/aiDetector.js';
 
-// Debug: Log SMTP host to verify .env is loaded
-console.log('EMAIL_HOST:', process.env.EMAIL_HOST);
-console.log('EMAIL_PORT:', process.env.EMAIL_PORT);
-console.log('EMAIL_USER:', process.env.EMAIL_USER);
-console.log('EMAIL_FROM:', process.env.EMAIL_FROM);
-
 // Development CORS - allow localhost on any port
 const corsOrigin = (origin, callback) => {
   if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || process.env.NODE_ENV === 'production') {
@@ -101,6 +95,16 @@ app.use('/api/heatmap', heatmapRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/announcements', announcementRoutes);
 
+// Root endpoint - Health check
+app.get('/', (_req, res) => {
+  res.json({ 
+    message: 'PublicEye API running...', 
+    status: 'ok',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Health
 app.get('/health', (_req, res) => res.json({ status: 'ok', time: new Date() }));
 
@@ -116,7 +120,7 @@ setupSocketHandlers(io);
 cron.schedule('*/30 * * * *', runAIPatternDetector);
 
 connectDB().then(() => {
-  let PORT = process.env.PORT || 5000;
+  let PORT = parseInt(process.env.PORT, 10) || 5000;
   
   const startServer = (port) => {
     httpServer.listen(port, () => {

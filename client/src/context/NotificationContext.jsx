@@ -26,6 +26,7 @@ export const NotificationProvider = ({ children, token, user }) => {
   }, [token, user]);
 
   const fetchNotifications = async () => {
+    if (!token || !user) return;
     try {
       const res = await axios.get(`${API}/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -33,7 +34,10 @@ export const NotificationProvider = ({ children, token, user }) => {
       setNotifications(res.data.notifications);
       setUnreadCount(res.data.unreadCount);
     } catch (err) {
-      console.error('Failed to fetch notifications:', err.message);
+      // Silently fail if unauthorized - user might be logging out
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch notifications:', err.message);
+      }
     }
   };
 

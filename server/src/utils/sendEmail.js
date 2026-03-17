@@ -1,20 +1,11 @@
-const nodemailer = require("nodemailer");
+﻿const crypto = require('crypto');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.MAILTRAP_HOST,
-  port: process.env.MAILTRAP_PORT,
-  auth: {
-    user: process.env.MAILTRAP_USER,
-    pass: process.env.MAILTRAP_PASS,
-  },
-});
-
+// Mock send email - Nodemailer disabled for development
 const sendEmail = async ({ to, subject, html }) => {
-  await transporter.sendMail({
-    from: '"PUBLICEYE KENYA" <noreply@publiceye.com>',
+  console.log(' [EMAIL SERVICE - DEV MODE] Email:', {
     to,
     subject,
-    html,
+    htmlLength: html?.length
   });
 };
 

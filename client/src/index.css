@@ -11,10 +11,68 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Instrument Sans', sans-serif; background: #0d0d0d; color: rgb(235, 227, 227); line-height: 1.5; }
+body { 
+  font-family: 'Instrument Sans', sans-serif; 
+  background: #0d0d0d; 
+  color: rgb(235, 227, 227); 
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .syne { font-family: 'Syne', sans-serif; }
 .mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Responsive utilities */
+@layer components {
+  .responsive-px {
+    @apply px-4 md:px-6 lg:px-8;
+  }
+  .responsive-py {
+    @apply py-4 md:py-6 lg:py-8;
+  }
+  .responsive-container {
+    @apply w-full px-4 sm:px-6 md:px-8 mx-auto;
+  }
+  .responsive-text-lg {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+  .responsive-text-xl {
+    @apply text-xl sm:text-2xl md:text-3xl;
+  }
+  .responsive-grid-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2;
+  }
+  .responsive-grid-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+  .responsive-grid-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+  }
+}
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #111; }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+/* Prevent layout shift on scroll */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Mobile-first responsive text */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+/* Touch-friendly targets */
+button, a, input, textarea, select {
+  @apply touch-manipulation;
+}
+
+/* Smooth transitions */
+* {
+  @apply transition-colors duration-200;
+}

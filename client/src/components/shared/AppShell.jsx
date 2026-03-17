@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { LayoutDashboard, AlertTriangle, MessageSquare, Map, Trophy, Users, Heart, Shield, LogOut, Eye, Crown, Lock, Settings, Clock, Bell } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, MessageSquare, Map, Trophy, Users, Heart, Shield, LogOut, Eye, Crown, Lock, Settings, Clock, Bell, Menu, X } from 'lucide-react';
 import NotificationBell from './NotificationBell.jsx';
 import SocialMedia from './SocialMedia.jsx';
 
@@ -43,6 +43,7 @@ export default function AppShell({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => { 
     logout(); 
@@ -71,15 +72,26 @@ export default function AppShell({ children }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{background:'#0d0d0d'}}>
+    <div className="flex h-screen overflow-hidden flex-col md:flex-row" style={{background:'#0d0d0d'}}>
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-52 flex-shrink-0 flex flex-col" style={{background:'#111',borderRight:'1px solid rgba(255,255,255,0.06)'}}>
-        <div className="p-4" style={{borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
-          <Link to="/" className="flex items-center gap-2">
+      <aside className={`fixed md:relative w-52 h-screen md:h-auto flex-shrink-0 flex flex-col z-50 transform transition-transform duration-200 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{background:'#111',borderRight:'1px solid rgba(255,255,255,0.06)'}}>
+        <div className="p-4 flex items-center justify-between" style={{borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
+          <Link to="/" className="flex items-center gap-2 flex-1">
             <Eye size={18} className="text-red-400" />
-            <span className="syne font-extrabold">Public<span className="text-red-500">Eye</span></span>
+            <span className="syne font-extrabold text-sm md:text-base">Public<span className="text-red-500">Eye</span></span>
           </Link>
-          <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold" style={{background:roleBg,color:roleColor,fontSize:'9px',letterSpacing:'0.04em'}}>
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden">
+            <X size={20} className="text-white/50" />
+          </button>
+        </div>
+        
+        <div className="px-4 pt-3 pb-2">
+          <div className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold" style={{background:roleBg,color:roleColor,fontSize:'9px',letterSpacing:'0.04em'}}>
             {roleLabel}
           </div>
         </div>
@@ -95,6 +107,7 @@ export default function AppShell({ children }) {
             }
             return (
               <Link key={l.path} to={l.path}
+                onClick={() => setSidebarOpen(false)}
                 className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all"
                 style={{
                   color: active ? 'white' : (l.color || 'rgba(255,255,255,0.4)'),
@@ -108,8 +121,8 @@ export default function AppShell({ children }) {
         </nav>
 
         <div className="p-4" style={{borderTop:'1px solid rgba(255,255,255,0.06)'}}>
-          <div className="text-xs text-white/40 mb-1">{user?.firstName} {user?.lastName}</div>
-          <div className="text-xs text-white/25 mb-3">{user?.county}</div>
+          <div className="text-xs text-white/40 mb-1 truncate">{user?.firstName} {user?.lastName}</div>
+          <div className="text-xs text-white/25 mb-3 truncate">{user?.county}</div>
           <div className="flex gap-1 mb-2">
             <Link to="/settings" className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-xs font-semibold transition-all"
               style={{background:'rgba(37,99,235,0.15)',border:'1px solid rgba(37,99,235,0.3)',color:'#93C5FD'}}>
@@ -147,10 +160,13 @@ export default function AppShell({ children }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto flex flex-col">
-        {/* Header with notifications */}
+      <main className="flex-1 w-full overflow-y-auto flex flex-col">
+        {/* Header with notifications and mobile menu */}
         <div className="flex-shrink-0 p-4 border-b" style={{borderColor:'rgba(255,255,255,0.06)',background:'rgba(0,0,0,0.3)'}}>
           <div className="flex items-center justify-between">
+            <button onClick={() => setSidebarOpen(true)} className="md:hidden text-white/60 hover:text-white transition-colors">
+              <Menu size={24} />
+            </button>
             <div></div>
             <div className="flex items-center gap-2">
               {(user?.role === 'superadmin' || user?.role === 'countyadmin') && <NotificationBell />}

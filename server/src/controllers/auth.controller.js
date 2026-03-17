@@ -59,14 +59,19 @@ export const register = async (req, res) => {
       ...(finalRole === 'countyadmin' && { countyAdminRequestedAt: new Date() })
     });
     // Optionally send welcome emails, skip verification
-    if (finalRole === 'citizen') {
-      await sendWelcomeCitizenEmail(email, firstName);
-    }
-    if (finalRole === 'countyadmin') {
-      await sendWelcomeCountyAdminEmail(email, firstName, county);
-      const superAdminEmail = 'mainajulius696@gmail.com';
-      const approvalLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/admin/county-admins/pending`;
-      await sendCountyAdminApprovalEmail(superAdminEmail, user, approvalLink);
+    try {
+      if (finalRole === 'citizen') {
+        await sendWelcomeCitizenEmail(email, firstName);
+      }
+      if (finalRole === 'countyadmin') {
+        await sendWelcomeCountyAdminEmail(email, firstName, county);
+        const superAdminEmail = 'mainajulius696@gmail.com';
+        const approvalLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/admin/county-admins/pending`;
+        await sendCountyAdminApprovalEmail(superAdminEmail, user, approvalLink);
+      }
+    } catch (emailErr) {
+      console.warn('Email sending failed (non-critical):', emailErr.message);
+      // Don't fail registration if email fails
     }
     res.status(201).json({
       message: finalRole === 'countyadmin' 

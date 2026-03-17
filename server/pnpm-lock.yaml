@@ -44,9 +44,6 @@ importers:
       node-cron:
         specifier: ^3.0.3
         version: 3.0.3
-      nodemailer:
-        specifier: ^8.0.2
-        version: 8.0.2
       socket.io:
         specifier: ^4.6.2
         version: 4.8.3
@@ -863,10 +860,6 @@ packages:
     resolution: {integrity: sha512-TkCET/3rr9mUuRp+CpO7qfgT++aAxfDRaalQhwPFzI9BY/2rCDn6OfpZOVggi1AXfTPpfkTrg5f5WQx5G1uLxA==}
     deprecated: Use uuid module instead
     hasBin: true
-
-  nodemailer@8.0.2:
-    resolution: {integrity: sha512-zbj002pZAIkWQFxyAaqoxvn+zoIwRnS40hgjqTXudKOOJkiFFgBeNqjgD3/YCR12sZnrghWYBY+yP1ZucdDRpw==}
-    engines: {node: '>=6.0.0'}
 
   nodemon@3.1.14:
     resolution: {integrity: sha512-jakjZi93UtB3jHMWsXL68FXSAosbLfY0In5gtKq3niLSkrWznrVBzXFNOEMJUfc9+Ke7SHWoAZsiMkNP3vq6Jw==}
@@ -2038,8 +2031,6 @@ snapshots:
   node-options@0.0.6: {}
 
   node-uuid@1.4.8: {}
-
-  nodemailer@8.0.2: {}
 
   nodemon@3.1.14:
     dependencies:

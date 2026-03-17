@@ -11,13 +11,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally
+// Handle 401 globally - but not on login/register pages
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('pe_token');
-      window.location.href = '/login';
+      // Only redirect if not on auth pages
+      const isAuthPage = window.location.pathname === '/login' || 
+                         window.location.pathname === '/register' ||
+                         window.location.pathname === '/forgot-password';
+      
+      if (!isAuthPage) {
+        localStorage.removeItem('pe_token');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(err);
   }
