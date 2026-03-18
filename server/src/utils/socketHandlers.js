@@ -102,12 +102,32 @@ export const setupSocketHandlers = (io) => {
     // Admin: delete message
     socket.on('delete_message', async ({ messageId, county }) => {
       try {
-        if (!['countyadmin', 'superadmin'].includes(socket.user.role)) return;
+        const msg = await ChatMessage.findById(messageId);
+        if (!msg) return;
+
+        const isAdmin = ['countyadmin', 'superadmin'].includes(socket.user.role);
+        const isOwner = msg.sender.toString() === socket.user._id.toString();
+
+        // Admin or message owner can delete
+        if (!isAdmin && !isOwner) {
+          socket.emit('error', 'Not allowed to delete this message');
+          return;
+        }
+
         if (socket.user.role === 'countyadmin' && socket.user.assignedCounty !== county) return;
+
         await ChatMessage.findByIdAndUpdate(messageId, {
-          isDeleted: true, deletedBy: socket.user._id, deletedAt: new Date(), message: '[deleted]'
+          isDeleted: true,
+          deletedBy: socket.user._id,
+          deletedAt: new Date(),
+          message: '[deleted]',
+          attachments: []
         });
+
+        // Emit to BOTH rooms so everyone gets the update
+        io.to(`chat:${county}:${msg.room}`).emit('message_deleted', { messageId });
         io.to(`county:${county}`).emit('message_deleted', { messageId });
+
       } catch (err) {
         socket.emit('error', err.message);
       }
