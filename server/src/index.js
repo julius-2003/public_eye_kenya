@@ -29,10 +29,17 @@ import { runAIPatternDetector } from './services/aiDetector.js';
 
 // Development CORS - allow localhost on any port
 const corsOrigin = (origin, callback) => {
-  if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || process.env.NODE_ENV === 'production') {
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://public-eye-kenya-dbll-git-main-julius-2003s-projects.vercel.app',
+    process.env.CLIENT_URL
+  ].filter(Boolean);
+  
+  if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('vercel.app') || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production') {
     callback(null, true);
   } else {
-    callback(null, process.env.CLIENT_URL || 'http://localhost:5173');
+    callback(null, true); // Allow all in production
   }
 };
 
