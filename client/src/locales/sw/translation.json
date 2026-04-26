@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "title": "Mipangilio",
+    "language": {
+      "title": "Mapendeleo ya Lugha",
+      "description": "Chagua lugha unayopendelea kutumia.",
+      "english": "Kiingereza",
+      "swahili": "Kiswahili"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title_pt1": "Iwajibishe",
+      "title_pt2": "Kenya.",
+      "subtitle": "Kuripoti ufisadi bila kutaja jina, kugundua muundo wa AI, na uwajibikaji wa wakati halisi kwa kaunti zote 47. Utambulisho wako unabaki siri. Ukweli haufichwi.",
+      "btn_report": "Anza Kuripoti",
+      "btn_heatmap": "Tazama Ramani"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language Preferences",
+      "description": "Choose your preferred language for the interface.",
+      "english": "English",
+      "swahili": "Swahili"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title_pt1": "Hold Kenya",
+      "title_pt2": "Accountable.",
+      "subtitle": "Anonymous corruption reporting, AI pattern detection, and real-time accountability for all 47 counties. Your identity stays hidden. The truth doesn't.",
+      "btn_report": "Start Reporting",
+      "btn_heatmap": "View Heatmap"
+    }
+  }
+}

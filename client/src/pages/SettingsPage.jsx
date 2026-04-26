@@ -6,8 +6,11 @@ import { User, Edit, Save, LogOut, CheckCircle, AlertCircle } from 'lucide-react
 import AppShell from '../components/shared/AppShell.jsx';
 import SimpleFaceEnroll from '../components/auth/SimpleFaceEnroll.jsx';
 import { useNavigate } from 'react-router-dom';
+import LanguageSwitcher from '../components/shared/LanguageSwitcher.jsx';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const { user: meFromAuth, logout } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
@@ -147,7 +150,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="syne font-extrabold text-2xl">My Profile</h1>
+              <h1 className="syne font-extrabold text-2xl">{t('settings.title', 'My Profile')}</h1>
             </div>
             <p className="text-white/40 text-sm">Manage your account information and preferences</p>
           </div>
@@ -294,6 +297,15 @@ export default function SettingsPage() {
               ) : (
                 <div className="text-white/70">{form.bio || 'No bio added yet'}</div>
               )}
+            </div>
+
+            {/* Language Preferences */}
+            <div className="rounded-xl p-6" style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)'}}>
+              <label className="block text-sm font-semibold mb-2">{t('settings.language.title', 'Language Preferences')}</label>
+              <p className="text-white/40 text-xs mb-4">{t('settings.language.description', 'Choose your preferred language for the interface.')}</p>
+              <div className="w-fit">
+                <LanguageSwitcher />
+              </div>
             </div>
 
             {/* Account Stats */}

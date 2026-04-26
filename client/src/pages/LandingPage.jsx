@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Shield, Eye, MapPin, Zap, Users, Lock } from 'lucide-react';
 import SocialMedia from '../components/shared/SocialMedia.jsx';
+import LanguageSwitcher from '../components/shared/LanguageSwitcher.jsx';
+import { useTranslation } from 'react-i18next';
 
 export default function LandingPage() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen" style={{background:'linear-gradient(135deg,#0A0A0A 0%,#1a0505 40%,#0d0a1a 80%,#0A0A0A 100%)'}}>
       {/* Nav */}
@@ -15,6 +18,7 @@ export default function LandingPage() {
           <span className="text-xs px-2 py-0.5 rounded-full" style={{background:'rgba(201,168,76,0.12)',border:'1px solid rgba(201,168,76,0.3)',color:'#F0D98B'}}>Kenya</span>
         </div>
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           <Link to="/login" className="text-sm text-white/60 hover:text-white px-4 py-2 transition-colors">Sign In</Link>
           <Link to="/register" className="text-sm font-semibold px-4 py-2 rounded-lg transition-all" style={{background:'#BB0000',color:'white'}}>Get Started</Link>
         </div>
@@ -26,17 +30,17 @@ export default function LandingPage() {
           ✦ Citizen Accountability Platform v5
         </div>
         <h1 className="syne font-extrabold mb-6 leading-none" style={{fontSize:'clamp(3rem,8vw,6rem)',letterSpacing:'-0.04em'}}>
-          Hold Kenya<br /><span style={{color:'#BB0000'}}>Accountable.</span>
+          {t('landing.hero.title_pt1', 'Hold Kenya')}<br /><span style={{color:'#BB0000'}}>{t('landing.hero.title_pt2', 'Accountable.')}</span>
         </h1>
         <p className="text-white/50 text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
-          Anonymous corruption reporting, AI pattern detection, and real-time accountability for all 47 counties. Your identity stays hidden. The truth doesn't.
+          {t('landing.hero.subtitle', 'Anonymous corruption reporting, AI pattern detection, and real-time accountability for all 47 counties. Your identity stays hidden. The truth doesn\'t.')}
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Link to="/register" className="px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105" style={{background:'#BB0000',color:'white'}}>
-            Start Reporting
+            {t('landing.hero.btn_report', 'Start Reporting')}
           </Link>
           <Link to="/heatmap" className="px-8 py-4 rounded-xl font-semibold text-white/70 hover:text-white transition-all" style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)'}}>
-            View Heatmap
+            {t('landing.hero.btn_heatmap', 'View Heatmap')}
           </Link>
         </div>
       </div>

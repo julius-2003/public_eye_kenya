@@ -61,8 +61,8 @@ export default function UserTable() {
         </select>
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* Table - Desktop */}
+      <div className="rounded-xl overflow-hidden hidden md:block" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
         {/* Head */}
         <div className="grid px-4 py-3" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 80px', background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           {['User','County','Role','Status','Actions'].map(h => (
@@ -108,6 +108,61 @@ export default function UserTable() {
                 style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)' }}
                 title={u.isSuspended ? 'Unsuspend' : 'Suspend'}>
                 {u.isSuspended ? '✅' : '⛔'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Cards - Mobile */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="p-8 text-center text-white/30 text-sm">Loading users...</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-8 text-center text-white/20 text-sm">No users found</div>
+        ) : filtered.map(u => (
+          <div key={u._id} className="rounded-lg p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)' }}>
+                {u.alias?.[0] || 'C'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-white/80 font-medium truncate">{u.alias}</div>
+                <div className="text-[10px] text-white/30 truncate">{u.email}</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
+              <div>
+                <div className="text-white/40 mb-1">County</div>
+                <div className="text-white/70">{u.county}</div>
+              </div>
+              <div>
+                <div className="text-white/40 mb-1">Role</div>
+                <div><RoleBadge role={u.role} /></div>
+              </div>
+              <div className="col-span-2">
+                <div className="text-white/40 mb-1">Status</div>
+                {u.isSuspended
+                  ? <span className="px-2 py-0.5 rounded-full text-[9px] font-bold" style={{ background: 'rgba(220,38,38,0.15)', color: '#fca5a5', border: '1px solid rgba(220,38,38,0.25)' }}>Suspended</span>
+                  : u.emailVerified
+                    ? <span className="px-2 py-0.5 rounded-full text-[9px] font-bold" style={{ background: 'rgba(22,163,74,0.15)', color: '#86efac', border: '1px solid rgba(22,163,74,0.25)' }}>Verified</span>
+                    : <span className="px-2 py-0.5 rounded-full text-[9px] font-bold" style={{ background: 'rgba(234,179,8,0.15)', color: '#fde047', border: '1px solid rgba(234,179,8,0.25)' }}>Pending</span>
+                }
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {isSuperAdmin && (
+                <button onClick={() => setEditUser(u)}
+                  className="flex-1 px-3 py-1.5 rounded-lg text-xs transition-all"
+                  style={{ background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(37,99,235,0.3)' }}>
+                  Edit Role
+                </button>
+              )}
+              <button onClick={() => handleSuspend(u._id, !u.isSuspended, u.alias)}
+                className="flex-1 px-3 py-1.5 rounded-lg text-xs transition-all"
+                style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)' }}>
+                {u.isSuspended ? 'Unsuspend' : 'Suspend'}
               </button>
             </div>
           </div>
