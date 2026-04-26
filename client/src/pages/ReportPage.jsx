@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../api.js';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext.jsx';
 import AppShell from '../components/shared/AppShell.jsx';
 import { Upload, ThumbsUp, AlertTriangle, ThumbsDown, X, Send, Paperclip, ChevronLeft, MessageSquare } from 'lucide-react';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const CATEGORIES = ['Ghost Workers','Contractor Kickbacks','Missing Funds','Bribery','Nepotism','Procurement Fraud','Other'];
 const SEVERITIES = ['low','medium','high','critical'];
@@ -30,7 +28,7 @@ export default function ReportPage() {
   const bottomRef = useRef(null);
   const messageFileInputRef = useRef(null);
 
-  const fetchReports = () => axios.get(`${API}/reports`).then(r => setReports(r.data.reports));
+  const fetchReports = () => api.get('/reports').then(r => setReports(r.data.reports));
   useEffect(() => { fetchReports(); }, []);
 
   // Scroll to bottom when messages change
@@ -47,7 +45,7 @@ export default function ReportPage() {
     if (!selectedReport) return;
     setLoadingMessages(true);
     try {
-      const res = await axios.get(`${API}/reports/${selectedReport._id}/messages`);
+      const res = await api.get(`/reports/${selectedReport._id}/messages`);
       setReportMessages(res.data.messages);
     } catch (err) {
       toast.error('Failed to load messages');
@@ -110,7 +108,7 @@ export default function ReportPage() {
           const formData = new FormData();
           formData.append('file', file);
           try {
-            const res = await axios.post(`${API}/evidence/upload`, formData, {
+            const res = await api.post(`/evidence/upload`, formData, {
               headers: { 'Content-Type': 'multipart/form-data' }
             });
             evidenceUrls.push(res.data);
@@ -121,7 +119,7 @@ export default function ReportPage() {
         setUploading(false);
       }
 
-      await axios.post(`${API}/reports`, { 
+      await api.post('/reports', { 
         ...form, 
         county: user.county,
         evidenceFiles: evidenceUrls
@@ -148,7 +146,7 @@ export default function ReportPage() {
         formData.append('file', messageAttachedFiles[0]);
       }
 
-      const res = await axios.post(`${API}/reports/${selectedReport._id}/messages`, formData, {
+      const res = await api.post(`/reports/${selectedReport._id}/messages`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -165,7 +163,7 @@ export default function ReportPage() {
 
   const vote = async (id, voteType) => {
     try {
-      await axios.post(`${API}/reports/${id}/vote`, { voteType });
+      await api.post(`/reports/${id}/vote`, { voteType });
       fetchReports();
     } catch (err) { toast.error(err.response?.data?.message || 'Vote failed'); }
   };
@@ -214,19 +212,67 @@ export default function ReportPage() {
               <label className="block text-xs font-semibold text-white/50 mb-2 uppercase tracking-widest">Report Title</label>
               <input className={inputClass} style={inputStyle} value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="e.g. Ghost Workers in Water Dept." />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-white/50 mb-2 uppercase tracking-widest">Category</label>
-                <select className={inputClass} style={{...inputStyle,background:'rgba(255,255,255,0.06)'}} value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>
-                  <option value="">Select category</option>
-                  {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
-                </select>
+            {/* Category Picker */}
+            <div>
+              <label className="block text-xs font-semibold text-white/50 mb-3 uppercase tracking-widest">Category</label>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map(c => {
+                  const catColors = {
+                    'Ghost Workers':      { bg:'rgba(124,58,237,0.18)', border:'rgba(124,58,237,0.45)', text:'#c4b5fd', icon:'👻' },
+                    'Contractor Kickbacks':{ bg:'rgba(234,88,12,0.18)',  border:'rgba(234,88,12,0.45)',  text:'#fdba74', icon:'🤝' },
+                    'Missing Funds':      { bg:'rgba(220,38,38,0.18)',  border:'rgba(220,38,38,0.45)',  text:'#fca5a5', icon:'💸' },
+                    'Bribery':            { bg:'rgba(217,119,6,0.18)',  border:'rgba(217,119,6,0.45)',  text:'#fde68a', icon:'💰' },
+                    'Nepotism':           { bg:'rgba(37,99,235,0.18)',  border:'rgba(37,99,235,0.45)',  text:'#93c5fd', icon:'👥' },
+                    'Procurement Fraud':  { bg:'rgba(5,150,105,0.18)', border:'rgba(5,150,105,0.45)', text:'#6ee7b7', icon:'📋' },
+                    'Other':              { bg:'rgba(100,116,139,0.18)',border:'rgba(100,116,139,0.45)',text:'#cbd5e1', icon:'❓' },
+                  };
+                  const col = catColors[c] || catColors['Other'];
+                  const active = form.category === c;
+                  return (
+                    <button key={c} type="button"
+                      onClick={() => setForm({...form, category: c})}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:scale-105"
+                      style={{
+                        background: active ? col.bg : 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${active ? col.border : 'rgba(255,255,255,0.1)'}`,
+                        color: active ? col.text : 'rgba(255,255,255,0.35)',
+                        boxShadow: active ? `0 0 10px ${col.border}` : 'none',
+                        transform: active ? 'scale(1.05)' : 'scale(1)'
+                      }}>
+                      <span>{col.icon}</span> {c}
+                    </button>
+                  );
+                })}
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-white/50 mb-2 uppercase tracking-widest">Severity</label>
-                <select className={inputClass} style={{...inputStyle,background:'rgba(255,255,255,0.06)'}} value={form.severity} onChange={e=>setForm({...form,severity:e.target.value})}>
-                  {SEVERITIES.map(s=><option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
-                </select>
+            </div>
+
+            {/* Severity Picker */}
+            <div>
+              <label className="block text-xs font-semibold text-white/50 mb-3 uppercase tracking-widest">Severity / Intensity</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { val:'low',      label:'Low',      icon:'🟢', bg:'rgba(22,163,74,0.15)',  border:'rgba(22,163,74,0.5)',   text:'#86efac', desc:'Minor issue' },
+                  { val:'medium',   label:'Medium',   icon:'🟡', bg:'rgba(217,119,6,0.15)',  border:'rgba(217,119,6,0.5)',   text:'#fde68a', desc:'Moderate concern' },
+                  { val:'high',     label:'High',     icon:'🟠', bg:'rgba(234,88,12,0.15)',  border:'rgba(234,88,12,0.5)',   text:'#fdba74', desc:'Serious threat' },
+                  { val:'critical', label:'Critical', icon:'🔴', bg:'rgba(220,38,38,0.15)',  border:'rgba(220,38,38,0.5)',   text:'#fca5a5', desc:'Urgent danger' },
+                ].map(s => {
+                  const active = form.severity === s.val;
+                  return (
+                    <button key={s.val} type="button"
+                      onClick={() => setForm({...form, severity: s.val})}
+                      className="flex flex-col items-center gap-1 p-3 rounded-xl text-xs font-bold transition-all hover:scale-105"
+                      style={{
+                        background: active ? s.bg : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${active ? s.border : 'rgba(255,255,255,0.08)'}`,
+                        color: active ? s.text : 'rgba(255,255,255,0.3)',
+                        boxShadow: active ? `0 0 14px ${s.border}` : 'none',
+                      }}>
+                      <span className="text-lg">{s.icon}</span>
+                      <span>{s.label}</span>
+                      <span className="font-normal opacity-70 text-center leading-tight" style={{fontSize:'10px'}}>{s.desc}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div>

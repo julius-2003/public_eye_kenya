@@ -1,21 +1,40 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import AppShell from '../components/shared/AppShell.jsx';
 import ProfileCard from '../components/shared/ProfileCard.jsx';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, MessageSquare, Trophy, Users } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [reports, setReports] = useState([]);
   const [aiFlagged, setAiFlagged] = useState([]);
+  const [loadingReports, setLoadingReports] = useState(true);
 
   useEffect(() => {
-    axios.get(`${API}/reports`).then(r => setReports(r.data.reports || []));
-    axios.get(`${API}/reports?aiFlag=true`).then(r => setAiFlagged(r.data.reports || [])).catch(()=>{});
+    const loadReports = async () => {
+      try {
+        setLoadingReports(true);
+        const res = await api.get('/reports');
+        setReports(res.data.reports || []);
+      } catch (err) {
+        console.warn('Failed to load reports (non-critical):', err.message);
+        setReports([]);
+      }
+      
+      try {
+        const res = await api.get('/reports?aiFlag=true');
+        setAiFlagged(res.data.reports || []);
+      } catch (err) {
+        console.warn('Failed to load AI flags (non-critical):', err.message);
+        setAiFlagged([]);
+      } finally {
+        setLoadingReports(false);
+      }
+    };
+    
+    loadReports();
   }, []);
 
   const stats = [
@@ -73,19 +92,28 @@ export default function DashboardPage() {
                 <h2 className="syne font-bold text-sm">County Reports</h2>
                 <Link to="/report" className="text-xs text-white/30 hover:text-white">View all →</Link>
               </div>
-              {reports.slice(0,5).map(r => (
-                <div key={r._id} className="p-4 flex items-center gap-4" style={{borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold text-white/80">{r.title}</div>
-                    <div className="text-xs text-white/30 mt-0.5">{r.anonymousAlias} · {r.category} {r.aiFlag ? '· 🤖' : ''}</div>
-                  </div>
-                  <span className="text-xs px-2 py-1 rounded-full font-bold" style={{background:sevBg(r.severity),color:sevColor(r.severity)}}>
-                    {r.severity?.toUpperCase()}
-                  </span>
-                  <span className="text-xs text-white/20">{r.voteScore || 0} votes</span>
+              {loadingReports ? (
+                <div className="space-y-3 p-4">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="h-12 bg-white/5 rounded-lg animate-pulse" />
+                  ))}
                 </div>
-              ))}
-              {reports.length === 0 && <p className="p-6 text-center text-white/20 text-sm">No reports yet in your county</p>}
+              ) : reports.length === 0 ? (
+                <p className="p-6 text-center text-white/20 text-sm">No reports yet in your county</p>
+              ) : (
+                reports.slice(0,5).map(r => (
+                  <div key={r._id} className="p-4 flex items-center gap-4" style={{borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-white/80">{r.title}</div>
+                      <div className="text-xs text-white/30 mt-0.5">{r.anonymousAlias} · {r.category} {r.aiFlag ? '· 🤖' : ''}</div>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full font-bold" style={{background:sevBg(r.severity),color:sevColor(r.severity)}}>
+                      {r.severity?.toUpperCase()}
+                    </span>
+                    <span className="text-xs text-white/20">{r.voteScore || 0} votes</span>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Quick links */}
@@ -93,7 +121,6 @@ export default function DashboardPage() {
               {[
                 {to:'/chat', icon:<MessageSquare size={18}/>, label:'County Chat', color:'#2563EB'},
                 {to:'/heatmap', icon:'🗺️', label:'Risk Heatmap', color:'#BB0000'},
-                {to:'/scoreboard', icon:<Trophy size={18}/>, label:'Scoreboard', color:'#C9A84C'},
                 {to:'/taskforce', icon:<Users size={18}/>, label:'Task Force', color:'#059669'},
               ].map((l,i) => (
                 <Link key={i} to={l.to} className="rounded-xl p-3 sm:p-4 text-center transition-all hover:scale-105"

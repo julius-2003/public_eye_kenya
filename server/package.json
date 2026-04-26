@@ -8,6 +8,7 @@
     "clean-dev": "powershell -Command \"Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }\" && nodemon src/index.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -20,6 +21,9 @@
     "mongoose": "^8.0.3",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
+    "nodemailer": "^8.0.6",
+    "openai": "^6.34.0",
+    "resend": "^3.2.0",
     "socket.io": "^4.6.2"
   },
   "devDependencies": {

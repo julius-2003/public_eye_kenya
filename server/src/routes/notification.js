@@ -30,22 +30,22 @@ router.get('/unread', authenticate, async (req, res) => {
   }
 });
 
+// Mark all as read (must come before /:id route)
+router.patch('/all/read', authenticate, async (req, res) => {
+  try {
+    await markAllAsRead(req.user._id);
+    res.json({ message: 'All notifications marked as read' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Mark single notification as read
 router.patch('/:id/read', authenticate, async (req, res) => {
   try {
     const notification = await markAsRead(req.params.id);
     if (!notification) return res.status(404).json({ message: 'Notification not found' });
     res.json({ notification });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Mark all as read
-router.patch('/all/read', authenticate, async (req, res) => {
-  try {
-    await markAllAsRead(req.user._id);
-    res.json({ message: 'All notifications marked as read' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

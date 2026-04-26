@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api.js';
 import toast from 'react-hot-toast';
 import { useParams, useNavigate } from 'react-router-dom';
 import { User, CheckCircle, AlertCircle, Trash2, ArrowLeft } from 'lucide-react';
 import AppShell from '../components/shared/AppShell.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminProfilePage() {
   const { id } = useParams();
@@ -21,7 +19,7 @@ export default function AdminProfilePage() {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API}/admin/users/${id}/profile`);
+      const res = await api.get(`/admin/users/${id}/profile`);
       setProfile(res.data.user);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to load profile');

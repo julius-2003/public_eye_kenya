@@ -276,6 +276,18 @@ export const verifyCountyAdmin = async (req, res) => {
       console.warn(`⚠️ Failed to send approval email to ${updatedUser.email}:`, emailErr.message);
     }
 
+    // Emit socket event to notify user of role change in real-time
+    try {
+      req.io.to(`user:${id}`).emit('role_updated', {
+        role: updatedUser.role,
+        isVerifiedCountyAdmin: updatedUser.isVerifiedCountyAdmin,
+        assignedCounty: updatedUser.assignedCounty,
+        message: 'Your role has been updated by the administrator'
+      });
+    } catch (socketErr) {
+      console.warn('Failed to emit role update event:', socketErr.message);
+    }
+
     res.json({
       message: 'County admin verified successfully! ✓ They can now log in.',
       user: updatedUser.toSafeObject(),

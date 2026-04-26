@@ -6,6 +6,15 @@ const BASE_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 export default function ProfileCard({ user }) {
   if (!user) return null;
 
+  const getImageUrl = (photoUrl) => {
+    if (!photoUrl) return null;
+    // Convert /uploads/... to full URL
+    if (photoUrl.startsWith('/uploads')) {
+      return `${BASE_URL}${photoUrl}`;
+    }
+    return photoUrl;
+  };
+
   return (
     <Link to="/settings">
       <div className="rounded-xl overflow-hidden transition-all hover:scale-105 cursor-pointer" style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)'}}>
@@ -14,10 +23,10 @@ export default function ProfileCard({ user }) {
           <div className="w-full h-full flex items-center justify-center overflow-hidden">
             {user.profilePhotoUrl ? (
               <img
-                src={`${BASE_URL}${user.profilePhotoUrl}`}
+                src={getImageUrl(user.profilePhotoUrl)}
                 alt={`${user.firstName} ${user.lastName}`}
                 className="w-full h-full object-cover"
-                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                onError={(e) => { e.target.style.display = 'none'; if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; }}
               />
             ) : null}
             <div className="w-full h-full flex items-center justify-center" style={{display: user.profilePhotoUrl ? 'none' : 'flex'}}>

@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api.js';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext.jsx';
 import AppShell from '../components/shared/AppShell.jsx';
 import { Plus, Users } from 'lucide-react';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function TaskForcePage() {
   const { user } = useAuth();
@@ -13,12 +11,12 @@ export default function TaskForcePage() {
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState({ name:'', description:'' });
 
-  const load = () => axios.get(`${API}/taskforce`).then(r => setForces(r.data.forces || []));
+  const load = () => api.get('/taskforce').then(r => setForces(r.data.forces || []));
   useEffect(() => { load(); }, []);
 
   const create = async () => {
     try {
-      await axios.post(`${API}/taskforce`, form);
+      await api.post('/taskforce', form);
       toast.success('Task force created!');
       setShowNew(false);
       setForm({ name:'', description:'' });
@@ -28,7 +26,7 @@ export default function TaskForcePage() {
 
   const join = async (id) => {
     try {
-      await axios.post(`${API}/taskforce/${id}/join`);
+      await api.post(`/taskforce/${id}/join`);
       toast.success('Joined task force!');
       load();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }

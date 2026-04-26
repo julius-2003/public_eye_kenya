@@ -10,17 +10,13 @@ export const register = async (req, res) => {
   try {
     const { email, password, firstName, lastName, phone, nationalId, county, role } = req.body;
 
-    // Validate all required fields (profilePhoto no longer required)
+    // Validate all required fields
     if (!email || !password || !firstName || !lastName || !phone || !nationalId || !county) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Validate role
-    if (role && !['citizen', 'countyadmin'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role. Must be citizen or countyadmin' });
-    }
-
-    const finalRole = role || 'citizen';
+    // Force role to citizen - no county admin registration allowed
+    const finalRole = 'citizen';
 
     // Check for duplicates - email, phone, nationalId
     const existing = await User.findOne({ $or: [{ email }, { phone }] });
@@ -43,7 +39,6 @@ export const register = async (req, res) => {
     }
 
     const nationalIdHash = await bcrypt.hash(nationalId, 12);
-    const assignedCounty = finalRole === 'countyadmin' ? county : null;
     // Auto-verify user, skip email verification
     const user = await User.create({
       email,
@@ -54,29 +49,19 @@ export const register = async (req, res) => {
       nationalIdHash,
       county,
       role: finalRole,
-      assignedCounty,
+      assignedCounty: null,
       emailVerified: true,
-      ...(finalRole === 'countyadmin' && { countyAdminRequestedAt: new Date() })
     });
-    // Optionally send welcome emails, skip verification
+    
+    // Send welcome email
     try {
-      if (finalRole === 'citizen') {
-        await sendWelcomeCitizenEmail(email, firstName);
-      }
-      if (finalRole === 'countyadmin') {
-        await sendWelcomeCountyAdminEmail(email, firstName, county);
-        const superAdminEmail = 'mainajulius696@gmail.com';
-        const approvalLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/admin/county-admins/pending`;
-        await sendCountyAdminApprovalEmail(superAdminEmail, user, approvalLink);
-      }
+      await sendWelcomeCitizenEmail(email, firstName);
     } catch (emailErr) {
       console.warn('Email sending failed (non-critical):', emailErr.message);
-      // Don't fail registration if email fails
     }
+    
     res.status(201).json({
-      message: finalRole === 'countyadmin' 
-        ? 'County admin registration submitted. Super admin must approve before access. Please complete face enrollment.' 
-        : 'Registration successful. You are auto-verified. Please complete face enrollment.',
+      message: 'Registration successful. You are auto-verified. Please complete face enrollment.',
       userId: user._id,
       role: finalRole
     });
@@ -88,7 +73,8 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const lowerEmail = email ? email.toLowerCase() : '';
+    const user = await User.findOne({ email: lowerEmail });
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
     const valid = await user.comparePassword(password);
@@ -139,8 +125,33 @@ export const verifyEmail = async (req, res) => {
 };
 
 export const forgotPassword = async (req, res) => {
-  // Forgot password is disabled
-  return res.status(403).json({ message: 'Forgot password is currently disabled.' });
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    // Always return success to prevent email enumeration
+    if (!user) return res.json({ message: 'If that email exists, a reset link has been sent.' });
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    user.passwordResetToken = hashedToken;
+    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
+
+    try {
+      await sendPasswordResetEmail(email, resetUrl, rawToken);
+    } catch (emailErr) {
+      console.warn('Password reset email failed (non-critical):', emailErr.message);
+    }
+
+    res.json({ message: 'If that email exists, a reset link has been sent.' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 export const resetPassword = async (req, res) => {
@@ -158,7 +169,7 @@ export const resetPassword = async (req, res) => {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
     
     const user = await User.findOne({
-      email,
+      email: email ? email.toLowerCase() : '',
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() }
     });

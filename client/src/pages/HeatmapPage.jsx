@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api.js';
 import AppShell from '../components/shared/AppShell.jsx';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const riskColor = r => ({critical:'#DC2626',high:'#EA580C',medium:'#D97706',low:'#16A34A'})[r] || '#16A34A';
 const riskBg = r => ({critical:'rgba(220,38,38,0.15)',high:'rgba(234,88,12,0.15)',medium:'rgba(217,119,6,0.15)',low:'rgba(22,163,74,0.1)'})[r] || 'rgba(22,163,74,0.1)';
@@ -11,7 +9,7 @@ export default function HeatmapPage() {
   const [heatmap, setHeatmap] = useState([]);
 
   useEffect(() => {
-    axios.get(`${API}/heatmap`).then(r => setHeatmap(r.data.heatmap || []));
+    api.get('/heatmap').then(r => setHeatmap(r.data.heatmap || []));
   }, []);
 
   return (

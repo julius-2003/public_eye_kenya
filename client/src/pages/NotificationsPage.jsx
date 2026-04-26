@@ -17,17 +17,6 @@ export default function NotificationsPage() {
     return true;
   });
 
-  // Check access - only admins can view this
-  if (!['superadmin', 'countyadmin'].includes(user?.role)) {
-    return (
-      <AppShell>
-        <div className="p-6 text-center text-white/40">
-          You do not have access to this page.
-        </div>
-      </AppShell>
-    );
-  }
-
   const getIconForType = (type) => {
     const icons = {
       'new_report': <FileText size={16} />,

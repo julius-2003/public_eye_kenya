@@ -10,7 +10,6 @@ const citizenLinks = [
   { path: '/report', icon: <AlertTriangle size={16}/>, label: 'New Report' },
   { path: '/chat', icon: <MessageSquare size={16}/>, label: 'County Chat' },
   { path: '/heatmap', icon: <Map size={16}/>, label: 'Heatmap' },
-  { path: '/scoreboard', icon: <Trophy size={16}/>, label: 'Scoreboard' },
   { path: '/taskforce', icon: <Users size={16}/>, label: 'Task Force' },
   { path: '/announcements', icon: <Bell size={16}/>, label: 'Announcements', color: '#DC2626' },
   { path: '/support', icon: <Heart size={16}/>, label: 'Support Us', color: '#34D399' },
@@ -21,7 +20,9 @@ const countyadminLinks = [
   { path: '/admin', icon: <LayoutDashboard size={16}/>, label: 'Overview' },
   { path: '/admin/users', icon: <Users size={16}/>, label: 'Users' },
   { path: '/admin/reports', icon: <AlertTriangle size={16}/>, label: 'Reports' },
+  { path: '/admin/chats', icon: <MessageSquare size={16}/>, label: 'Chat Moderation' },
   { path: '/admin/moderation', icon: <Shield size={16}/>, label: 'Moderation' },
+  { path: '/notifications', icon: <Bell size={16}/>, label: 'Notifications' },
   { path: '/admin/announcements', icon: <Bell size={16}/>, label: 'Announcements', color: '#DC2626' },
   { path: '/admin/support-settings', icon: <Settings size={16}/>, label: 'Support Settings' },
 ];
@@ -32,7 +33,9 @@ const superadminLinks = [
   { path: '/admin/counties', icon: <Map size={16}/>, label: 'County Management' },
   { path: '/admin/users', icon: <Users size={16}/>, label: 'All Users' },
   { path: '/admin/reports', icon: <AlertTriangle size={16}/>, label: 'All Reports' },
+  { path: '/admin/chats', icon: <MessageSquare size={16}/>, label: 'All Chats' },
   { path: '/admin/admins', icon: <Lock size={16}/>, label: 'Admin Management' },
+  { path: '/notifications', icon: <Bell size={16}/>, label: 'Notifications' },
   { path: '/admin/announcements', icon: <Bell size={16}/>, label: 'Announcements', color: '#DC2626' },
   { path: '/admin/support-settings', icon: <Settings size={16}/>, label: 'Support Settings' },
   { path: '/admin/moderation', icon: <Shield size={16}/>, label: 'Global Moderation' },
@@ -169,7 +172,7 @@ export default function AppShell({ children }) {
             </button>
             <div></div>
             <div className="flex items-center gap-2">
-              {(user?.role === 'superadmin' || user?.role === 'countyadmin') && <NotificationBell />}
+              {user && <NotificationBell />}
             </div>
           </div>
         </div>

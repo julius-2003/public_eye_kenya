@@ -1,8 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { PaymentProvider } from './context/PaymentContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
+import { setNavigateToLogin } from './api.js';
 import SupportWidget from './components/support/SupportWidget.jsx';
 
 // Pages
@@ -15,7 +17,7 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import ReportPage from './pages/ReportPage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
 import HeatmapPage from './pages/HeatmapPage.jsx';
-import ScoreboardPage from './pages/ScoreboardPage.jsx';
+
 import TaskForcePage from './pages/TaskForcePage.jsx';
 import SupportPage from './pages/SupportPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
@@ -28,6 +30,7 @@ import AdminProfilePage from './pages/AdminProfilePage.jsx';
 import NotificationsPage from './pages/NotificationsPage.jsx';
 import AnnouncementsPage from './pages/AnnouncementsPage.jsx';
 import AdminAnnouncementsPage from './pages/AdminAnnouncementsPage.jsx';
+import AdminChatPage from './pages/AdminChatPage.jsx';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -52,21 +55,28 @@ const SuperAdminRoute = ({ children }) => {
   return children;
 };
 
-function AppInner() {
-  const { user, token } = useAuth();
+function AppRoutes() {
+  const { user, token, loading } = useAuth();
+  const navigate = useNavigate();
+  
+  // Initialize navigation handler for api interceptor
+  useEffect(() => {
+    setNavigateToLogin(navigate);
+  }, [navigate]);
+  
   return (
     <NotificationProvider token={token} user={user}>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Forgot password and verify email disabled */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
         <Route path="/report" element={<PrivateRoute><ReportPage /></PrivateRoute>} />
         <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
         <Route path="/heatmap" element={<PrivateRoute><HeatmapPage /></PrivateRoute>} />
-        <Route path="/scoreboard" element={<PrivateRoute><ScoreboardPage /></PrivateRoute>} />
+
         <Route path="/taskforce" element={<PrivateRoute><TaskForcePage /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
         <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
@@ -76,6 +86,7 @@ function AppInner() {
         <Route path="/admin/users" element={<AdminRoute><AdminPage /></AdminRoute>} />
         <Route path="/admin/users/:id/profile" element={<AdminRoute><AdminProfilePage /></AdminRoute>} />
         <Route path="/admin/reports" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
+        <Route path="/admin/chats" element={<AdminRoute><AdminChatPage /></AdminRoute>} />
         <Route path="/admin/moderation" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
         <Route path="/admin/counties" element={<SuperAdminRoute><AdminOverviewPage /></SuperAdminRoute>} />
         <Route path="/admin/admins" element={<SuperAdminRoute><AdminPage /></SuperAdminRoute>} />
@@ -86,8 +97,15 @@ function AppInner() {
       </Routes>
       {user && <SupportWidget />}
       <Toaster position="top-right" toastOptions={{ style: { background: '#1a1a1a', color: 'white', border: '1px solid #333' } }} />
-      </BrowserRouter>
     </NotificationProvider>
+  );
+}
+
+function AppInner() {
+  return (
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
 

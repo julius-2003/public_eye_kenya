@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api.js';
 import toast from 'react-hot-toast';
 import { Save, Settings } from 'lucide-react';
 import AppShell from '../components/shared/AppShell.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminSupportSettingsPage() {
   const { user: me } = useAuth();
@@ -18,8 +16,8 @@ export default function AdminSupportSettingsPage() {
     try {
       setLoading(true);
       const [settingsRes, summaryRes] = await Promise.all([
-        axios.get(`${API}/admin/support/settings`),
-        axios.get(`${API}/admin/support/summary`)
+        api.get('/admin/support/settings'),
+        api.get('/admin/support/summary')
       ]);
       setSettings(settingsRes.data.settings);
       setSummary(summaryRes.data);
@@ -41,7 +39,7 @@ export default function AdminSupportSettingsPage() {
   const saveSettings = async () => {
     setSaving(true);
     try {
-      await axios.put(`${API}/admin/support/settings`, settings);
+      await api.put('/admin/support/settings', settings);
       toast.success('Support settings updated!');
       loadSettings();
     } catch (err) {

@@ -14,7 +14,7 @@ import authRoutes from './routes/auth.js';
 import reportRoutes from './routes/reports.js';
 import adminRoutes from './routes/admin.js';
 import chatRoutes from './routes/chat.js';
-import scoreboardRoutes from './routes/scoreboard.js';
+
 import taskforceRoutes from './routes/taskforce.js';
 import evidenceRoutes from './routes/evidence.js';
 import supportRoutes from './routes/support.js';
@@ -25,6 +25,7 @@ import announcementRoutes from './routes/announcement.js';
 import uploadsRoutes from './routes/uploads.js';
 import { setupSocketHandlers } from './utils/socketHandlers.js';
 import { runAIPatternDetector } from './services/aiDetector.js';
+
 
 // Development CORS - allow localhost on any port
 const corsOrigin = (origin, callback) => {
@@ -86,7 +87,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/scoreboard', scoreboardRoutes);
+
 app.use('/api/taskforce', taskforceRoutes);
 app.use('/api/evidence', evidenceRoutes);
 app.use('/api/support', supportRoutes);
@@ -119,18 +120,17 @@ setupSocketHandlers(io);
 // AI cron: every 30 min
 cron.schedule('*/30 * * * *', runAIPatternDetector);
 
+
 connectDB().then(() => {
   let PORT = parseInt(process.env.PORT, 10) || 5000;
   
   const startServer = (port) => {
     httpServer.listen(port, () => {
       console.log(`🚀 PublicEye server on port ${port}`);
-    });
-
-    httpServer.once('error', (err) => {
+    }).once('error', (err) => {
       if (err.code === 'EADDRINUSE') {
         console.warn(`⚠️  Port ${port} is in use, trying ${port + 1}...`);
-        httpServer.close();
+        httpServer.removeAllListeners('error');
         startServer(port + 1);
       } else {
         throw err;

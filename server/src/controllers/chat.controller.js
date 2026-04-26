@@ -1,7 +1,7 @@
-const ChatMessage = require('../models/ChatMessage');
+import ChatMessage from '../models/ChatMessage.js';
 
 // GET /api/chat/:county/:roomType
-exports.getMessages = async (req, res) => {
+export const getMessages = async (req, res) => {
   try {
     const { county, roomType } = req.params;
     // Citizens can only read their county's chat
@@ -18,7 +18,7 @@ exports.getMessages = async (req, res) => {
 };
 
 // DELETE /api/admin/chat/:id — admin moderation
-exports.deleteMessage = async (req, res) => {
+export const deleteMessage = async (req, res) => {
   try {
     const msg = await ChatMessage.findById(req.params.id);
     if (!msg) return res.status(404).json({ message: 'Message not found' });

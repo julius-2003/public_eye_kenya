@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api.js';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import AppShell from '../components/shared/AppShell.jsx';
 import ProfileCard from '../components/shared/ProfileCard.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Zap, Clock } from 'lucide-react';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminOverviewPage() {
   const { user } = useAuth();
@@ -17,16 +15,16 @@ export default function AdminOverviewPage() {
   const [triggering, setTriggering] = useState(false);
 
   useEffect(() => {
-    axios.get(`${API}/admin/overview`).then(r => setStats(r.data));
-    axios.get(`${API}/admin/ai/flags`).then(r => setAiFlagged(r.data.reports||[]));
+    api.get('/admin/overview').then(r => setStats(r.data));
+    api.get('/admin/ai/flags').then(r => setAiFlagged(r.data.reports||[]));
   }, []);
 
   const triggerAI = async () => {
     setTriggering(true);
     try {
-      await axios.post(`${API}/admin/ai/trigger`);
+      await api.post('/admin/ai/trigger');
       toast.success('AI Pattern Detector triggered!');
-      axios.get(`${API}/admin/ai/flags`).then(r => setAiFlagged(r.data.reports||[]));
+      api.get('/admin/ai/flags').then(r => setAiFlagged(r.data.reports||[]));
     } catch { toast.error('Failed to trigger AI'); }
     finally { setTriggering(false); }
   };

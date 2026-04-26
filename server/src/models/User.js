@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
   bio: { type: String, default: '' }, // User bio/about section
   
   // Profile & Media
+  profilePhotoUrl: { type: String, default: null }, // Profile photo path (e.g., /uploads/profiles/filename.jpg)
   
   // Auth
   emailVerified: { type: Boolean, default: false },

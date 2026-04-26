@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import axios from 'axios';
+import api from '../api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import AppShell from '../components/shared/AppShell.jsx';
 import { Send, Paperclip, X, Trash2, Copy, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api','') : 'http://localhost:5000');
 const ROOMS = ['general','water','roads','health','education','housing','finance'];
 
@@ -60,8 +59,7 @@ export default function ChatPage() {
     if (!socketRef.current) return;
     socketRef.current.emit('join_room', { county: user.county, room });
     
-    const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-    axios.get(`${API}/chat/${user.county}/${room}`, { headers: authHeader })
+    api.get(`/chat/${user.county}/${room}`)
       .then(r => setMessages(r.data.messages || []))
       .catch(() => setMessages([]));
   }, [room, user.county, token]);
@@ -93,11 +91,8 @@ export default function ChatPage() {
           const formData = new FormData();
           formData.append('file', file);
           try {
-            const res = await axios.post(`${API}/chat/upload`, formData, {
-              headers: { 
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${token}`
-              }
+            const res = await api.post('/chat/upload', formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
             });
             attachments.push({ url: res.data.url, fileType: file.type.startsWith('image/') ? 'image' : 'video', fileName: file.name });
           } catch { toast.error(`Failed to upload ${file.name}`); }

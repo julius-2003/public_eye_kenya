@@ -1,5 +1,4 @@
 import Report from '../models/Report.js';
-import Scoreboard from '../models/Scoreboard.js';
 
 export const runAIPatternDetector = async () => {
   try {
@@ -24,18 +23,9 @@ export const runAIPatternDetector = async () => {
       );
     }
 
-    // Update county risk scores in scoreboard
-    const countyCounts = await Report.aggregate([
-      { $group: { _id: '$county', total: { $sum: 1 }, critical: { $sum: { $cond: [{ $eq: ['$severity', 'critical'] }, 1, 0] } } } }
-    ]);
-
-    for (const c of countyCounts) {
-      const risk = c.critical > 10 ? 'critical' : c.critical > 5 ? 'high' : c.total > 20 ? 'medium' : 'low';
-      await Scoreboard.updateMany({ county: c._id }, { corruptionRisk: risk }, { upsert: false });
-    }
-
     console.log(`✅ AI Detector: flagged ${contractorPatterns.length} contractor patterns`);
   } catch (err) {
     console.error('AI Detector error:', err.message);
   }
 };
+

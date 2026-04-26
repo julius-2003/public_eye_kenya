@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from 'react';
+import api from '../api.js';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext.jsx';
 import { User, Edit, Save, LogOut, CheckCircle, AlertCircle } from 'lucide-react';
 import AppShell from '../components/shared/AppShell.jsx';
 import SimpleFaceEnroll from '../components/auth/SimpleFaceEnroll.jsx';
 import { useNavigate } from 'react-router-dom';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function SettingsPage() {
   const { user: meFromAuth, logout } = useAuth();
@@ -26,6 +24,10 @@ export default function SettingsPage() {
     bio: ''
   });
 
+  const updateForm = useCallback((field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  }, []);
+
   const loadProfile = async () => {
     try {
       setLoading(true);
@@ -41,7 +43,7 @@ export default function SettingsPage() {
       
       // Check face enrollment status
       try {
-        const faceRes = await axios.get(`${API}/auth/face/status`);
+        const faceRes = await api.get('/auth/face/status');
         setFaceEnrolled(faceRes.data.hasFace);
       } catch (err) {
         console.warn('Could not check face status:', err.message);
@@ -57,11 +59,11 @@ export default function SettingsPage() {
     loadProfile();
   }, []);
 
-  const saveProfile = async () => {
+  const saveProfile = useCallback(async () => {
     setSaving(true);
     try {
       // Only save text fields - profile picture is set via face enrollment
-      const response = await axios.put(`${API}/auth/profile`, {
+      const response = await api.put('/auth/profile', {
         firstName: form.firstName,
         lastName: form.lastName,
         phone: form.phone,
@@ -88,7 +90,7 @@ export default function SettingsPage() {
     } finally {
       setSaving(false);
     }
-  };
+  }, [form]);
 
   // Handle face enrollment
   const handleFaceEnroll = async (faceData) => {
@@ -109,7 +111,7 @@ export default function SettingsPage() {
         facePhotoData: faceData.facePhotoUrl // Base64 data URL
       };
 
-      const res = await axios.post(`${API}/auth/face/store`, payload);
+      const res = await api.post('/auth/face/store', payload);
 
       toast.dismiss();
       toast.success('✓ Profile picture updated successfully!');
@@ -221,7 +223,7 @@ export default function SettingsPage() {
                 <input
                   type="text"
                   value={form.firstName}
-                  onChange={e => setForm({...form, firstName: e.target.value})}
+                  onChange={e => updateForm('firstName', e.target.value)}
                   className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                   style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'white'}}
                 />
@@ -237,7 +239,7 @@ export default function SettingsPage() {
                 <input
                   type="text"
                   value={form.lastName}
-                  onChange={e => setForm({...form, lastName: e.target.value})}
+                  onChange={e => updateForm('lastName', e.target.value)}
                   className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                   style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'white'}}
                 />
@@ -262,7 +264,7 @@ export default function SettingsPage() {
                 <input
                   type="tel"
                   value={form.phone}
-                  onChange={e => setForm({...form, phone: e.target.value})}
+                  onChange={e => updateForm('phone', e.target.value)}
                   className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                   style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'white'}}
                 />
@@ -283,7 +285,7 @@ export default function SettingsPage() {
               {isEditing ? (
                 <textarea
                   value={form.bio}
-                  onChange={e => setForm({...form, bio: e.target.value})}
+                  onChange={e => updateForm('bio', e.target.value)}
                   placeholder="Tell us a bit about yourself (optional)"
                   rows="3"
                   className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"

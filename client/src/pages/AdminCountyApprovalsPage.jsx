@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api.js';
 import toast from 'react-hot-toast';
 import { ChevronRight, Check, X, Clock, AlertCircle } from 'lucide-react';
 import AppShell from '../components/shared/AppShell.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminCountyApprovalsPage() {
   const { user: me } = useAuth();
@@ -15,7 +13,7 @@ export default function AdminCountyApprovalsPage() {
 
   const loadPending = async () => {
     try {
-      const res = await axios.get(`${API}/admin/county-admins/pending`);
+      const res = await api.get('/admin/county-admins/pending');
       setPending(res.data.users || []);
     } catch (err) {
       toast.error('Failed to load pending approvals');
@@ -29,7 +27,7 @@ export default function AdminCountyApprovalsPage() {
   const approve = async (id) => {
     setLoading(true);
     try {
-      await axios.put(`${API}/admin/county-admins/${id}/verify`);
+      await api.put(`/admin/county-admins/${id}/verify`);
       toast.success('County admin approved! Email notification sent.');
       loadPending();
       setSelectedAdmin(null);

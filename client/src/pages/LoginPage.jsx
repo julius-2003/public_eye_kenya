@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -11,7 +11,15 @@ export default function LoginPage() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleEmailChange = useCallback((e) => {
+    setForm(prev => ({ ...prev, email: e.target.value }));
+  }, []);
+
+  const handlePasswordChange = useCallback((e) => {
+    setForm(prev => ({ ...prev, password: e.target.value }));
+  }, []);
+
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -41,7 +49,7 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [form, login, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{background:'#0d0d0d'}}>
@@ -60,14 +68,14 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="rounded-2xl p-8" style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)'}}>
           <div className="mb-4">
             <label className="block text-xs font-semibold text-white/50 mb-2 uppercase tracking-widest">Email</label>
-            <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})}
+            <input type="email" value={form.email} onChange={handleEmailChange}
               className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
               style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'white'}}
               placeholder="your@email.com" required />
           </div>
           <div className="mb-6 relative">
             <label className="block text-xs font-semibold text-white/50 mb-2 uppercase tracking-widest">Password</label>
-            <input type={show ? 'text' : 'password'} value={form.password} onChange={e => setForm({...form, password: e.target.value})}
+            <input type={show ? 'text' : 'password'} value={form.password} onChange={handlePasswordChange}
               className="w-full px-4 py-3 rounded-xl text-sm outline-none pr-10"
               style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'white'}}
               placeholder="••••••••" required />
@@ -81,6 +89,7 @@ export default function LoginPage() {
           </button>
           <div className="flex items-center justify-between text-white/30 text-sm mt-4">
             <Link to="/register" className="text-red-400 hover:text-red-300">New Account</Link>
+            <Link to="/forgot-password" className="text-white/30 hover:text-white/60 text-xs">Forgot password?</Link>
           </div>
         </form>
       </div>

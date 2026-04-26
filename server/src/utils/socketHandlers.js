@@ -1,40 +1,75 @@
 import jwt from 'jsonwebtoken';
 import ChatMessage from '../models/ChatMessage.js';
 import User from '../models/User.js';
+import { notifyAdmins } from '../services/notification.service.js';
+import { sendChatNotificationEmail } from '../services/emailService.js';
 
 export const setupSocketHandlers = (io) => {
   // Auth middleware for socket
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
-      if (!token) return next(new Error('Unauthorized'));
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id).select('anonymousAlias county role isSuspended assignedCounty');
-      if (!user) return next(new Error('User not found'));
-      socket.user = user;
-      next();
-    } catch {
-      next(new Error('Invalid token'));
+      if (!token) {
+        return next(new Error('Unauthorized'));
+      }
+
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id).select('anonymousAlias county role isSuspended assignedCounty');
+        if (!user) {
+          return next(new Error('User not found'));
+        }
+        socket.user = user;
+        next();
+      } catch (jwtErr) {
+        // Token expired or invalid - allow connection to fail gracefully
+        console.warn('JWT verification failed:', jwtErr.message);
+        return next(new Error('Invalid or expired token'));
+      }
+    } catch (err) {
+      next(new Error('Authentication failed'));
     }
+  });
+
+  // Add error handler for authentication failures
+  io.on('connection_error', (error) => {
+    console.warn('Socket connection error (non-blocking):', error.message);
   });
 
   io.on('connection', (socket) => {
     console.log(`🔌 ${socket.user.anonymousAlias} connected`);
 
+    // Subscribe user to their own user events for real-time updates
+    socket.join(`user:${socket.user._id}`);
+
+    // Send connection confirmation
+    socket.emit('connected', { 
+      message: 'Connected to server',
+      userId: socket.user._id 
+    });
+
     // Join county room
     socket.on('join_county', (county) => {
-      if (socket.user.role === 'countyadmin' && socket.user.assignedCounty !== county) return;
-      if (socket.user.role === 'citizen' && socket.user.county !== county) return;
-      socket.join(`county:${county}`);
+      try {
+        if (socket.user.role === 'countyadmin' && socket.user.assignedCounty !== county) return;
+        if (socket.user.role === 'citizen' && socket.user.county !== county) return;
+        socket.join(`county:${county}`);
+        socket.emit('county_joined', { county });
+      } catch (err) {
+        socket.emit('error', 'Failed to join county');
+      }
     });
 
     // Join specific chat room
     socket.on('join_room', ({ county, room }) => {
-      // Check if user is blocked
-      const superAdmin = io.sockets.sockets;
-      if (socket.user.role === 'countyadmin' && socket.user.assignedCounty !== county) return;
-      if (socket.user.role === 'citizen' && socket.user.county !== county) return;
-      socket.join(`chat:${county}:${room}`);
+      try {
+        if (socket.user.role === 'countyadmin' && socket.user.assignedCounty !== county) return;
+        if (socket.user.role === 'citizen' && socket.user.county !== county) return;
+        socket.join(`chat:${county}:${room}`);
+        socket.emit('room_joined', { county, room });
+      } catch (err) {
+        socket.emit('error', 'Failed to join room');
+      }
     });
 
     // Send chat message
@@ -94,6 +129,42 @@ export const setupSocketHandlers = (io) => {
           attachments: msg.attachments,
           createdAt: msg.createdAt
         });
+
+        // Async: in-app notification + email to county admin (non-blocking)
+        setImmediate(async () => {
+          try {
+            // Only notify for real text messages, not every single chat
+            if (!trimmedMessage) return;
+
+            // In-app notification for county admin
+            await notifyAdmins(
+              'new_chat',
+              `New message in ${county} #${room}`,
+              `${socket.user.anonymousAlias}: "${trimmedMessage.slice(0, 120)}"`,
+              { actionUrl: '/admin/chats', county, room },
+              county,
+              'normal',
+            );
+
+            // Email: county admin only (not citizens — too spammy for chat)
+            const countyAdmin = await User.findOne({
+              role: 'countyadmin',
+              assignedCounty: county,
+              isVerifiedCountyAdmin: true,
+            }).select('email firstName');
+
+            if (countyAdmin?.email) {
+              await sendChatNotificationEmail([countyAdmin.email], {
+                county, room,
+                alias: socket.user.anonymousAlias,
+                message: trimmedMessage,
+                recipientName: countyAdmin.firstName,
+              });
+            }
+          } catch (e) {
+            console.error('[socketHandlers] Post-message notification error:', e.message);
+          }
+        });
       } catch (err) {
         socket.emit('error', err.message);
       }
@@ -135,11 +206,23 @@ export const setupSocketHandlers = (io) => {
 
     // Payment success event
     socket.on('join_payment_room', (paymentId) => {
-      socket.join(`payment:${paymentId}`);
+      try {
+        socket.join(`payment:${paymentId}`);
+      } catch (err) {
+        socket.emit('error', 'Failed to join payment room');
+      }
     });
 
-    socket.on('disconnect', () => {
-      console.log(`🔌 ${socket.user.anonymousAlias} disconnected`);
+    // Handle disconnect gracefully
+    socket.on('disconnect', (reason) => {
+      console.log(`🔌 ${socket.user.anonymousAlias} disconnected (${reason})`);
+      // Cleanup happens automatically - socket rooms are cleared
+    });
+
+    // Handle manual logout
+    socket.on('logout', () => {
+      console.log(`🚪 ${socket.user.anonymousAlias} logging out`);
+      socket.disconnect();
     });
   });
 };

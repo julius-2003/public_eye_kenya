@@ -11,7 +11,7 @@ const reportMessageSchema = new mongoose.Schema({
   
   // Attachments (same as chat)
   attachments: [{
-    type: String, // URL of file
+    url: String, // URL of file
     fileType: String, // 'image', 'video', 'document'
     fileName: String
   }],
