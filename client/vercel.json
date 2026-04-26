@@ -1,8 +1,5 @@
 {
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist",
-  "framework": "vite",
-  "env": {
-    "VITE_API_URL": "@api_url"
-  }
+  "framework": "vite"
 }
