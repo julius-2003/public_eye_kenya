@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('users'); // 'users' or 'chats'
   const [selectedCounty, setSelectedCounty] = useState(
-    user?.role === 'countyadmin' ? user.assignedCounty : 'Nairobi'
+    user?.role === 'countyadmin' ? user.assignedCounty : 'All'
   );
   const [selectedRoom, setSelectedRoom] = useState('general');
 
@@ -37,7 +37,10 @@ export default function AdminDashboard() {
   // Available counties for dropdown
   const availableCounties = user?.role === 'countyadmin'
     ? [user.assignedCounty]
-    : KENYA_COUNTIES;
+    : ['All', ...KENYA_COUNTIES];
+
+  const [promotingUser, setPromotingUser] = useState(null);
+  const [promoteCounty, setPromoteCounty] = useState('');
 
   // Load users when county changes
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function AdminDashboard() {
       
       // Filter by county
       const countyFiltered = data.users?.filter(u => {
+        if (selectedCounty === 'All') return true;
         const userCounty = u.assignedCounty || u.county;
         return userCounty === selectedCounty;
       }) || [];
@@ -224,6 +228,14 @@ export default function AdminDashboard() {
                       </span>
                     </div>
                     <div className="flex gap-2">
+                      {user?.role === 'superadmin' && u.role === 'citizen' && (
+                        <button
+                          onClick={() => { setPromotingUser(u); setPromoteCounty(u.county || ''); }}
+                          className="px-2 py-1 rounded text-xs font-bold transition-all hover:opacity-80"
+                          style={{ background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(37,99,235,0.3)', color: '#93C5FD' }}>
+                          ⬆️ Promote
+                        </button>
+                      )}
                       <button
                         onClick={() => suspend(u._id, !u.isSuspended)}
                         className="px-2 py-1 rounded text-xs font-bold transition-all hover:opacity-80"
@@ -299,6 +311,38 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* Promotion Modal */}
+      {promotingUser && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-xl p-6 max-w-sm w-full mx-4" style={{border:'1px solid rgba(255,255,255,0.1)'}}>
+            <h3 className="syne font-bold text-lg mb-2">Promote to County Admin</h3>
+            <p className="text-white/50 text-sm mb-4">Select the county for {promotingUser.anonymousAlias}</p>
+            
+            <select
+              value={promoteCounty}
+              onChange={e => setPromoteCounty(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm mb-6 outline-none"
+              style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'white'}}>
+              <option value="">Select a county...</option>
+              {KENYA_COUNTIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            <div className="flex gap-3">
+              <button onClick={() => setPromotingUser(null)} className="flex-1 py-2 rounded-lg font-semibold transition-all" style={{background:'rgba(255,255,255,0.06)',color:'white'}}>Cancel</button>
+              <button 
+                onClick={() => {
+                  if(!promoteCounty) return toast.error('Select a county');
+                  changeRole(promotingUser._id, 'countyadmin', promoteCounty);
+                  setPromotingUser(null);
+                }}
+                className="flex-1 py-2 rounded-lg font-semibold transition-all" style={{background:'rgba(37,99,235,0.2)',border:'1px solid rgba(37,99,235,0.4)',color:'#93C5FD'}}>
+                Confirm Promotion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
