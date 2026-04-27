@@ -53,12 +53,10 @@ export const register = async (req, res) => {
       emailVerified: true,
     });
     
-    // Send welcome email
-    try {
-      await sendWelcomeCitizenEmail(email, firstName);
-    } catch (emailErr) {
+    // Send welcome email asynchronously without blocking the response
+    sendWelcomeCitizenEmail(email, firstName).catch(emailErr => {
       console.warn('Email sending failed (non-critical):', emailErr.message);
-    }
+    });
     
     res.status(201).json({
       message: 'Registration successful. You are auto-verified. Please complete face enrollment.',

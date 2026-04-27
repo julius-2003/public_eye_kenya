@@ -2,16 +2,18 @@ import Report from '../models/Report.js';
 import User from '../models/User.js';
 import { notifyAdmins } from '../services/notification.service.js';
 import { sendNewReportEmail } from '../services/emailService.js';
+import { runAIPatternDetector } from '../services/aiDetector.js';
 
 export const getReports = async (req, res) => {
   try {
-    const { county, status, severity, page = 1, limit = 20 } = req.query;
+    const { county, status, severity, aiFlag, page = 1, limit = 20 } = req.query;
     const filter = {};
     if (req.user.role === 'citizen') filter.county = req.user.county;
     else if (req.user.role === 'countyadmin') filter.county = req.user.assignedCounty;
     else if (county) filter.county = county;
     if (status) filter.status = status;
     if (severity) filter.severity = severity;
+    if (aiFlag !== undefined) filter.aiFlag = aiFlag === 'true';
     const reports = await Report.find(filter)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
@@ -76,7 +78,6 @@ export const createReport = async (req, res) => {
           await sendNewReportEmail(adminEmails, { reportTitle: title, county, severity, category });
         }
 
-        // Email: county citizens (only for high/critical to avoid spam)
         if (['high', 'critical'].includes(severity)) {
           const citizens = await User.find({ role: 'citizen', county }).select('email').limit(500);
           const citizenEmails = citizens.map(c => c.email).filter(Boolean);
@@ -84,6 +85,9 @@ export const createReport = async (req, res) => {
             await sendNewReportEmail(citizenEmails, { reportTitle: title, county, severity, category });
           }
         }
+
+        // Instantly trigger AI analysis on the newly created report
+        runAIPatternDetector().catch(err => console.error('Auto AI run failed:', err));
       } catch (e) {
         console.error('[createReport] Post-response processing error:', e.message);
       }

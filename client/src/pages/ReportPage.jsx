@@ -356,6 +356,11 @@ export default function ReportPage() {
                   <h2 className="font-bold text-lg text-white mb-1">{selectedReport.title}</h2>
                   <p className="text-xs text-white/50">📍 {selectedReport.subcounty || selectedReport.county} · {selectedReport.anonymousAlias} · {selectedReport.category}</p>
                   <p className="text-sm text-white/60 mt-2">{selectedReport.description}</p>
+                  {selectedReport.aiFlag && (
+                    <div className="mt-3 p-3 rounded-lg text-xs" style={{background:'rgba(124,58,237,0.1)',border:'1px solid rgba(124,58,237,0.25)',color:'#A78BFA'}}>
+                      <strong>🤖 AI Analysis Pattern:</strong> {selectedReport.aiPattern || 'Corruption risk detected by AI.'}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all hover:scale-105"
